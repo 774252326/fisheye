@@ -258,6 +258,53 @@ static bool FindLed1(const cv::Mat &frame, cv::Point2f &led, double thres=220)
 }
 
 
+static bool FindLed1m(const cv::Mat &frame, cv::Point2f &led, const cv::Mat &mask, double thres=220)
+{
+    cv::Mat bw;
+    if(frame.channels()==1)
+    {
+        cv::threshold(frame,bw,thres,255,cv::THRESH_BINARY);
+    }
+    else
+    {
+        cv::Mat mg;
+        cv::cvtColor(frame, mg,CV_BGR2GRAY);
+        cv::threshold(mg,bw,thres,255,cv::THRESH_BINARY);
+    }
+
+
+    cv::bitwise_and(bw,mask,bw);
+
+    std::vector< std::vector<cv::Point> > cc;
+
+    ConnectComponent::GetCC(bw,cc);
+
+    if(cc.empty())
+        return false;
+
+
+    std::vector<size_t> ncc(cc.size(),0);
+
+    for(size_t i=0;i<cc.size();i++)
+        ncc[i]=cc[i].size();
+
+    size_t maxi=std::max_element(ncc.begin(),ncc.end())-ncc.begin();
+
+    led=cv::Point2f(0,0);
+
+    for(int i=0;i<cc[maxi].size();i++)
+    {
+        led.x+=cc[maxi][i].x;
+        led.y+=cc[maxi][i].y;
+
+    }
+
+    led.x/=cc[maxi].size();
+    led.y/=cc[maxi].size();
+    return true;
+}
+
+
 static cv::Vec4f Trianglate(cv::Point2f p1, const cv::Mat &K1, const cv::Mat &D1,
                             cv::Point2f p2, const cv::Mat &K2, const cv::Mat &D2,
                             const cv::Mat &rt)

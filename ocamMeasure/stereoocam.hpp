@@ -47,6 +47,34 @@ public:
     }
 
 
+    static cv::Mat CeilMask(double hceil, double rejectRadius, ocam_model * pm)
+    {
+        cv::Mat mask(pm->height, pm->width, CV_8UC1, cv::Scalar(255));
+
+        for(int i=0; i<mask.rows; i++)
+        {
+            for(int j=0;j<mask.cols;j++)
+            {
+                double pt2[2]={i,j};
+                double pt3[3];
+                cam2world(pt3,pt2,pm);
+
+                if(pt3[0]<0)
+                {
+                    pt3[1]*=hceil/pt3[0];
+                    pt3[2]*=hceil/pt3[0];
+
+                    if(pt3[1]*pt3[1]+pt3[2]*pt3[2]<rejectRadius*rejectRadius)
+                        mask.at<uchar>(i,j)=0;
+                }
+
+            }
+        }
+
+        return mask;
+    }
+
+
     bool Triangulate(cv::Vec3d &p, cv::Point2f led0, cv::Point2f led1)
     {
         double point2D[2][2]={{led0.y,led0.x},{led1.y,led1.x}};
@@ -114,6 +142,36 @@ public:
 
     static void DualCamTest3(uchar thres1=160, uchar thres2=160, int index1=0, int index2=1, std::string winname1="usb1", std::string winname2="usb2")
     {
+
+
+        StereoOcam soc;
+#if 0
+        std::string folder="/home/pi/fisheye/ocamMeasure/";
+
+        std::string fn0=folder+"usb3/calib_results.txt";
+        std::string fn1=folder+"usb4/calib_results.txt";
+        std::string fnrt=folder+"dual/rt1.yml";
+        soc.Load(fn0.c_str(),fn1.c_str(),fnrt);
+#else
+        soc.Load("C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb4\\calib_results.txt",
+                 "C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb3\\calib_results.txt",
+                 "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\dual\\rt1.yml");
+#endif
+
+        double radius=5000;
+        double hceil=3500-1000;
+
+        cv::Mat mask[2];
+        mask[0]=CeilMask(hceil,radius,&(soc.model[0]));
+        mask[1]=CeilMask(hceil+soc.rt.at<double>(4),radius,&(soc.model[0]));
+
+
+        cv::imshow("mask0",mask[0]);
+        cv::imshow("mask1",mask[1]);
+        cv::waitKey();
+
+        cv::Mat image[2];
+
         cv::VideoCapture c[2]={
             cv::VideoCapture(index1),
             cv::VideoCapture(index2)
@@ -125,21 +183,6 @@ public:
         c[1].set(CV_CAP_PROP_FRAME_WIDTH, 640);
         c[1].set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
-        StereoOcam soc;
-
-        std::string folder="/home/pi/fisheye/ocamMeasure/";
-
-        std::string fn0=folder+"usb3/calib_results.txt";
-        std::string fn1=folder+"usb4/calib_results.txt";
-        std::string fnrt=folder+"dual/rt1.yml";
-        soc.Load(fn0.c_str(),fn1.c_str(),fnrt);
-
-//        soc.Load("C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb4\\calib_results.txt",
-//                 "C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb3\\calib_results.txt",
-//                 "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\dual\\rt1.yml");
-
-
-        cv::Mat image[2];
 
         int k=0;
 
@@ -163,7 +206,10 @@ public:
 
             cv::Point2f led1,led2;
 
-            if(FindLed1(image[0],led1,thres1) && FindLed1(image[1],led2,thres2))
+
+
+            if(FindLed1m(image[0],led1,mask[0],thres1)
+                    && FindLed1m(image[1],led2,mask[1],thres2))
             {
 
                 cv::circle(image[0],led1,20,cv::Scalar(255,0,0),3);
