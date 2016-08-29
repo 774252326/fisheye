@@ -127,16 +127,16 @@ public:
 
         StereoOcam soc;
 
-//        std::string folder="/home/pi/untitled/";
+        std::string folder="/home/pi/fisheye/ocamMeasure/";
 
-//        std::string fn0=folder+"usb3/calib_results.txt";
-//        std::string fn1=folder+"usb4/calib_results.txt";
-//        std::string fnrt=folder+"dual/rt1.yml";
-//        soc.Load(fn0.c_str(),fn1.c_str(),fnrt);
+        std::string fn0=folder+"usb3/calib_results.txt";
+        std::string fn1=folder+"usb4/calib_results.txt";
+        std::string fnrt=folder+"dual/rt1.yml";
+        soc.Load(fn0.c_str(),fn1.c_str(),fnrt);
 
-        soc.Load("C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb4\\calib_results.txt",
-                 "C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb3\\calib_results.txt",
-                 "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\dual\\rt1.yml");
+//        soc.Load("C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb4\\calib_results.txt",
+//                 "C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\Scaramuzza_OCamCalib_v3.0_win\\usb3\\calib_results.txt",
+//                 "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\dual\\rt1.yml");
 
 
         cv::Mat image[2];
@@ -159,7 +159,7 @@ public:
                 c[1].read(image[1]);
             }
 
-            // clock_t t=clock();
+             clock_t t=clock();
 
             cv::Point2f led1,led2;
 
@@ -184,8 +184,10 @@ public:
 
 //                                SendXYZ(file, 0, 0,-1);
                 }
-                //        std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
+
             }
+
+               std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
 
             cv::imshow(winname1,image[0]);
             cv::imshow(winname2,image[1]);
