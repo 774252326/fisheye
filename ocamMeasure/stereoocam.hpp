@@ -84,12 +84,12 @@ public:
         cam2world(point3D[1], point2D[1], &(model[1]));
 
 
-//            printf("\nworld2cam: pixel coordinates reprojected onto the image\n");
-//            printf("m_row= %2.4f, m_col=%2.4f\n", point2D[0][0], point2D[0][1]);
-//            printf("x= %2.4f, y=%2.4f, z=%2.4f\n", point3D[0][0], point3D[0][1], point3D[0][2]);
-//            printf("\nworld2cam: pixel coordinates reprojected onto the image\n");
-//            printf("m_row= %2.4f, m_col=%2.4f\n", point2D[1][1], point2D[1][1]);
-//            printf("x= %2.4f, y=%2.4f, z=%2.4f\n", point3D[1][0], point3D[1][1], point3D[1][2]);
+        //            printf("\nworld2cam: pixel coordinates reprojected onto the image\n");
+        //            printf("m_row= %2.4f, m_col=%2.4f\n", point2D[0][0], point2D[0][1]);
+        //            printf("x= %2.4f, y=%2.4f, z=%2.4f\n", point3D[0][0], point3D[0][1], point3D[0][2]);
+        //            printf("\nworld2cam: pixel coordinates reprojected onto the image\n");
+        //            printf("m_row= %2.4f, m_col=%2.4f\n", point2D[1][1], point2D[1][1]);
+        //            printf("x= %2.4f, y=%2.4f, z=%2.4f\n", point3D[1][0], point3D[1][1], point3D[1][2]);
 
 
 
@@ -106,17 +106,17 @@ public:
         cv::Mat ray11=R*(cv::Mat_<double>(3,1)<<point3D[1][1],point3D[1][0],-point3D[1][2]);
         ray[1][1]=cv::Vec3d(ray11);
 
-//        std::cout<<"ray="<<ray[0][0]<<'\n'
-//                           <<ray[0][1]<<'\n'
-//                                        <<ray[1][0]<<'\n'
-//                                                     <<ray[1][1]<<'\n'
-//                                                               <<std::flush;
+        //        std::cout<<"ray="<<ray[0][0]<<'\n'
+        //                           <<ray[0][1]<<'\n'
+        //                                        <<ray[1][0]<<'\n'
+        //                                                     <<ray[1][1]<<'\n'
+        //                                                               <<std::flush;
 
         cv::Matx22d A(ray[0][1].ddot(ray[0][1]), -ray[0][1].ddot(ray[1][1]),
                 ray[0][1].ddot(ray[1][1]), -ray[1][1].ddot(ray[1][1]));
 
         if(A.val[0]*A.val[3]==A.val[2]*A.val[1])
-         {
+        {
             std::cout<<"parallel ray\n"<<std::flush;
             return false;
         }
@@ -128,7 +128,7 @@ public:
         cv::Vec2d k=A.inv()*b;
 
         if(k[0]<0 || k[1]<0)
-         {
+        {
             std::cout<<"behind ray\n";
             return false;
         }
@@ -145,7 +145,7 @@ public:
 
 
         StereoOcam soc;
-#if 0
+#if 1
         std::string folder="/home/pi/fisheye/ocamMeasure/";
 
         std::string fn0=folder+"usb3/calib_results.txt";
@@ -158,7 +158,7 @@ public:
                  "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\dual\\rt1.yml");
 #endif
 
-        double radius=5000;
+        double radius=6000;
         double hceil=3500-1000;
 
         cv::Mat mask[2];
@@ -166,9 +166,9 @@ public:
         mask[1]=CeilMask(hceil+soc.rt.at<double>(4),radius,&(soc.model[0]));
 
 
-        cv::imshow("mask0",mask[0]);
-        cv::imshow("mask1",mask[1]);
-        cv::waitKey();
+        //        cv::imshow("mask0",mask[0]);
+        //        cv::imshow("mask1",mask[1]);
+        //        cv::waitKey();
 
         cv::Mat image[2];
 
@@ -197,47 +197,46 @@ public:
         while(k!=27)
         {
 
-            {
-                c[0].read(image[0]);
-                c[1].read(image[1]);
-            }
-
-             clock_t t=clock();
-
-            cv::Point2f led1,led2;
-
-
-
-            if(FindLed1m(image[0],led1,mask[0],thres1)
-                    && FindLed1m(image[1],led2,mask[1],thres2))
+            if(c[0].read(image[0]) && c[1].read(image[1]))
             {
 
-                cv::circle(image[0],led1,20,cv::Scalar(255,0,0),3);
-                cv::circle(image[1],led2,20,cv::Scalar(0,255,0),3);
+                //             clock_t t=clock();
+
+                cv::Point2f led1,led2;
 
                 cv::Vec3d p;
 
+                if(FindLed1m(image[0],led1,mask[0],thres1)
+                        && FindLed1m(image[1],led2,mask[1],thres2)
+                        && soc.Triangulate(p,led1,led2)
+                        //&& cv::norm(p)>600
+                        )
 
-                if(soc.Triangulate(p,led1,led2))
+                    //                if(false && FindLed1(image[0],led1,thres1)
+                    //                        && FindLed1(image[1],led2,thres2))
                 {
+
+                    cv::circle(image[0],led1,20,cv::Scalar(255,0,0),3);
+                    cv::circle(image[1],led2,20,cv::Scalar(0,255,0),3);
                     std::cout<<"p="<<p<<'\n'<<std::flush;
 
-//                                SendXYZ(file, p[0],p[1],p[2]);
+                    SendXYZ(file, p[0],p[1],p[2]);
+
+
                 }
                 else
                 {
                     std::cout<<"fail to find p\n"<<std::flush;
 
-//                                SendXYZ(file, 0, 0,-1);
+                    SendXYZ(file, 0, 0,-1);
                 }
 
+                //               std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
+
+                cv::imshow(winname1,image[0]);
+                cv::imshow(winname2,image[1]);
+                k=cv::waitKey(1);
             }
-
-               std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
-
-            cv::imshow(winname1,image[0]);
-            cv::imshow(winname2,image[1]);
-            k=cv::waitKey(1);
 
         }
 

@@ -4,7 +4,9 @@
 
 int main()
 {
-    StereoOcam::DualCamTest3();
+    StereoOcam::DualCamTest3(50,50);
+
+//    test();
 
     return 0;
 }
