@@ -48,4 +48,7 @@ SOURCES += \
 
 HEADERS += \
     ocam_functions.h \
-    stereoocam.hpp
+    stereoocam.hpp \
+    ConnectComponent.hpp \
+    Measure.hpp \
+    ToArduino.hpp

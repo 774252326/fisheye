@@ -296,7 +296,6 @@ static bool FindLed1m(const cv::Mat &frame, cv::Point2f &led, const cv::Mat &mas
     {
         led.x+=cc[maxi][i].x;
         led.y+=cc[maxi][i].y;
-
     }
 
     led.x/=cc[maxi].size();
