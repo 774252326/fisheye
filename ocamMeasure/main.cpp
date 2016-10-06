@@ -119,8 +119,10 @@ static void Test()
 {
     dtc d("2.1mm/calib_results800x600.txt");
 
-    d.c.set(cv::CAP_PROP_FRAME_WIDTH, 800);
-    d.c.set(cv::CAP_PROP_FRAME_HEIGHT,600);
+    d.model.ScaleModel(0.4);
+
+    d.c.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+    d.c.set(cv::CAP_PROP_FRAME_HEIGHT,240);
     d.c.set(cv::CAP_PROP_SETTINGS,1);
 
     d.Capture();

@@ -322,6 +322,22 @@ public:
         cam2world(world,cam,this);
     }
 
+    void ScaleModel(double scale)
+    {
+        width=width*scale;
+        height=height*scale;
+
+        xc*=scale;
+        yc*=scale;
+
+        for(int i=0;i<length_pol;i++)
+            pol[i]/=scale;
+
+        for(int i=1;i<length_invpol;i++)
+            invpol[i]*=pow(scale,i);
+
+    }
+
 };
 
 #endif // OCAM_MODEL_HPP
