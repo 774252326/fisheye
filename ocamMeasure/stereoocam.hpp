@@ -3,7 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "ocam_functions.h"
+//#include "ocam_functions.h"
+#include "ocam_model.hpp"
 
 #include "Measure.hpp"
 
@@ -25,7 +26,7 @@ private:
         return false;
     }
 public:
-    struct ocam_model model[2];
+    ocam_model model[2];
 
     cv::Mat rt;
 
@@ -34,8 +35,8 @@ public:
 
     int Load(const char *fp0, const char *fp1, std::string rtfp)
     {
-        int flg0=get_ocam_model(&(model[0]), fp0);
-        int flg1=get_ocam_model(&(model[1]), fp1);
+        int flg0=model[0].Load(fp0);
+        int flg1=model[1].Load(fp1);
 
         bool flgrt=Load(rt,rtfp);
 
@@ -57,7 +58,7 @@ public:
             {
                 double pt2[2]={i,j};
                 double pt3[3];
-                cam2world(pt3,pt2,pm);
+                pm->cam2world(pt3,pt2);
 
                 if(pt3[0]<0)
                 {
@@ -75,22 +76,16 @@ public:
     }
 
 
+
+
+
     bool Triangulate(cv::Vec3d &p, cv::Point2f led0, cv::Point2f led1)
     {
         double point2D[2][2]={{led0.y,led0.x},{led1.y,led1.x}};
         double point3D[2][3];
 
-        cam2world(point3D[0], point2D[0], &(model[0]));
-        cam2world(point3D[1], point2D[1], &(model[1]));
-
-
-        //            printf("\nworld2cam: pixel coordinates reprojected onto the image\n");
-        //            printf("m_row= %2.4f, m_col=%2.4f\n", point2D[0][0], point2D[0][1]);
-        //            printf("x= %2.4f, y=%2.4f, z=%2.4f\n", point3D[0][0], point3D[0][1], point3D[0][2]);
-        //            printf("\nworld2cam: pixel coordinates reprojected onto the image\n");
-        //            printf("m_row= %2.4f, m_col=%2.4f\n", point2D[1][1], point2D[1][1]);
-        //            printf("x= %2.4f, y=%2.4f, z=%2.4f\n", point3D[1][0], point3D[1][1], point3D[1][2]);
-
+        model[0].cam2world(point3D[0], point2D[0]);
+        model[1].cam2world(point3D[1], point2D[1]);
 
 
         cv::Mat R;

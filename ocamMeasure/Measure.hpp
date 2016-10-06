@@ -245,7 +245,7 @@ static bool FindLed1(const cv::Mat &frame, cv::Point2f &led, double thres=220)
 
     led=cv::Point2f(0,0);
 
-    for(int i=0;i<cc[maxi].size();i++)
+    for(size_t i=0;i<cc[maxi].size();i++)
     {
         led.x+=cc[maxi][i].x;
         led.y+=cc[maxi][i].y;
@@ -292,7 +292,7 @@ static bool FindLed1m(const cv::Mat &frame, cv::Point2f &led, const cv::Mat &mas
 
     led=cv::Point2f(0,0);
 
-    for(int i=0;i<cc[maxi].size();i++)
+    for(size_t i=0;i<cc[maxi].size();i++)
     {
         led.x+=cc[maxi][i].x;
         led.y+=cc[maxi][i].y;
