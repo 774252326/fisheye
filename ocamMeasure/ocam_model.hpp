@@ -300,8 +300,10 @@ public:
     }
 
     ocam_model(const char *filename=NULL)
+        : pol(NULL)
+        , invpol(NULL)
     {
-        Release();
+//        Release();
         Load(filename);
     }
 

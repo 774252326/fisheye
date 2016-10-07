@@ -117,10 +117,10 @@ public:
 
 static void Test()
 {
-    dtc d("C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\ocamMeasure\\2.1mm\\calib_results1920x1080.txt");
+    dtc d("2.1mm/calib_results800x600.txt");
 
-    d.c.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
-    d.c.set(cv::CAP_PROP_FRAME_HEIGHT,1080);
+    d.c.set(cv::CAP_PROP_FRAME_WIDTH, 800);
+    d.c.set(cv::CAP_PROP_FRAME_HEIGHT,600);
     d.c.set(cv::CAP_PROP_SETTINGS,1);
 
     d.Capture();
