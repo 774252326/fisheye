@@ -10,6 +10,9 @@
 
 #include "ToArduino.hpp"
 
+#define VSN
+//#define CEILMASK
+
 class StereoOcam
 {
 private:
@@ -153,6 +156,8 @@ public:
                  "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\dual\\rt1.yml");
 #endif
 
+
+        #ifdef CEILMASK
         double radius=6000;
         double hceil=3500-1000;
 
@@ -161,9 +166,14 @@ public:
         mask[1]=CeilMask(hceil+soc.rt.at<double>(4),radius,&(soc.model[0]));
 
 
-        //        cv::imshow("mask0",mask[0]);
-        //        cv::imshow("mask1",mask[1]);
-        //        cv::waitKey();
+                cv::imshow("mask0",mask[0]);
+                cv::imshow("mask1",mask[1]);
+                cv::imwrite("mask0.png",mask[0]);
+                cv::imwrite("mask1.png",mask[1]);
+                cv::waitKey();
+                cv::destroyWindow("mask0");
+                cv::destroyWindow("mask1");
+#endif
 
         cv::Mat image[2];
 
@@ -175,9 +185,14 @@ public:
         c[0].set(CV_CAP_PROP_FRAME_WIDTH, 640);
         c[0].set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
+//        c[0].set(CV_CAP_PROP_EXPOSURE,-13);
+//        c[0].set(CV_CAP_PROP_GAIN,0);
+
         c[1].set(CV_CAP_PROP_FRAME_WIDTH, 640);
         c[1].set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
+//        c[1].set(CV_CAP_PROP_EXPOSURE,-13);
+//        c[1].set(CV_CAP_PROP_GAIN,0);
 
         int k=0;
 
@@ -185,9 +200,23 @@ public:
         cv::namedWindow(winname1, cv::WINDOW_NORMAL);
         cv::namedWindow(winname2, cv::WINDOW_NORMAL);
 
-
+#ifdef VSN
         FILE *file = fopen("/dev/ttyACM0", "w");
+//        FILE *file = fopen("/dev/ttyUSB0", "w");
+#else
+        int cport_nr=24,        /* /dev/ttyS0 (COM1 on windows) */
+        bdrate=19200;       /* 9600 baud */
+        char mode[]={'8','N','1',0};
 
+        if(RS232::OpenComport(cport_nr, bdrate, mode))
+        {
+            printf("Can not open comport\n");
+            return;
+        }
+
+        int ds[2]={0,0};
+
+#endif
 
         while(k!=27)
         {
@@ -195,39 +224,60 @@ public:
             if(c[0].read(image[0]) && c[1].read(image[1]))
             {
 
-                //             clock_t t=clock();
+//                             clock_t t=clock();
 
                 cv::Point2f led1,led2;
 
                 cv::Vec3d p;
-
+#ifdef CEILMASK
                 if(FindLed1m(image[0],led1,mask[0],thres1)
                         && FindLed1m(image[1],led2,mask[1],thres2)
                         && soc.Triangulate(p,led1,led2)
                         //&& cv::norm(p)>600
                         )
-
-                    //                if(false && FindLed1(image[0],led1,thres1)
-                    //                        && FindLed1(image[1],led2,thres2))
+#else
+                                    if(FindLed1(image[0],led1,thres1)
+                                            && FindLed1(image[1],led2,thres2)
+                    && soc.Triangulate(p,led1,led2))
+#endif
                 {
 
                     cv::circle(image[0],led1,20,cv::Scalar(255,0,0),3);
                     cv::circle(image[1],led2,20,cv::Scalar(0,255,0),3);
                     std::cout<<"p="<<p<<'\n'<<std::flush;
-
+#ifdef VSN
                     SendXYZ(file, p[0],p[1],p[2]);
+#else
+                    UpdateSpeed(ds[0],ds[1],p[0],p[1],p[2],600);
+                    ds[0]=0;
+                    short speeddata=(ds[0]<<8)|ds[1];
 
+                    SendValue(cport_nr,speeddata,1);
+
+
+#endif
 
                 }
                 else
                 {
                     std::cout<<"fail to find p\n"<<std::flush;
-
+#ifdef VSN
                     SendXYZ(file, 0, 0,-1);
+#else
+                    UpdateSpeed(ds[0],ds[1],0,0,-1,600);
+                    ds[0]=0;
+                    short speeddata=(ds[0]<<8)|ds[1];
+
+                    SendValue(cport_nr,speeddata,1);
+
+#endif
                 }
 
-                //               std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
-
+//                               std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
+#ifdef CEILMASK
+                image[0].setTo(0,255-mask[0]);
+                image[1].setTo(0,255-mask[1]);
+#endif
                 cv::imshow(winname1,image[0]);
                 cv::imshow(winname2,image[1]);
                 k=cv::waitKey(1);
@@ -235,7 +285,11 @@ public:
 
         }
 
+#ifdef VSN
         fclose(file);
+#else
+        RS232::CloseComport(cport_nr);
+#endif
     }
 
 

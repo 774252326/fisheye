@@ -150,8 +150,8 @@ int main(int argc, char **argv)
 
 //Test();
 
-    OcamCV("2.1mm/calib_results800x600.txt").test2(640,480,0.8);
-    return 0;
+//    OcamCV("2.1mm/calib_results800x600.txt").test2(640,480,0.8);
+//    return 0;
 
 //    struct ocam_model model;
 //    int flg0=get_ocam_model(&(model), "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\usb4\\calib_results.txt");
