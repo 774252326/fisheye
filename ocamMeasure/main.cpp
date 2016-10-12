@@ -148,9 +148,9 @@ static void Test()
 int main(int argc, char **argv)
 {
 
-Test();
+//Test();
 
-//    OcamCV("C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\ocamMeasure\\2.1mm\\calib_results1920x1080.txt").test2();
+    OcamCV("2.1mm/calib_results800x600.txt").test2(640,480,0.8);
     return 0;
 
 //    struct ocam_model model;

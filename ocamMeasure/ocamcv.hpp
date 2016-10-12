@@ -5,6 +5,7 @@
 #include "ocam_model.hpp"
 //#include "Head2Base.hpp"
 #include <opencv2/aruco.hpp>
+#include "ToArduino.hpp"
 
 class OcamCV
 {
@@ -224,57 +225,36 @@ public:
     }
 
 
-    void test2()
+    void test2(int w, int h, double scale)
     {
-        //        cv::Mat m=cv::imread("C:\\Users\\jhanbin\\Pictures\\TV_CAM_device_20161005_173453.757.png");
+        model.ScaleModel(scale);
 
-        cv::Mat m=cv::imread("C:\\Users\\jhanbin\\Pictures\\TV_CAM_device_20161005_173411.718.png");
+        cv::Mat m;
 
         cv::VideoCapture c(0);
 
-        c.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
-        c.set(cv::CAP_PROP_FRAME_HEIGHT,1080);
+        c.set(cv::CAP_PROP_FRAME_WIDTH, w);
+        c.set(cv::CAP_PROP_FRAME_HEIGHT,h);
         c.set(cv::CAP_PROP_SETTINGS,1);
 
         cv::namedWindow("f",cv::WINDOW_NORMAL);
+
+        c.read(m);
+        cv::imwrite("capture.png",m);
+
+        FILE *file = fopen("/dev/ttyACM0", "w");
 
         int k=0;
         while(k!=27)
         {
 
-
             if(c.read(m))
             {
                 clock_t t=clock();
-//                std::vector<cv::Point2f> pts;
 
-//                FindAR(m,pts);
+                cv::Vec3d tt=MarkerPos(m,120);
 
-//                if(!pts.empty())
-//                {
-//                    cv::aruco::drawDetectedMarkers(m,std::vector< std::vector<cv::Point2f> >(1,pts));
-
-//                    std::vector<cv::Point2d> ptsd(pts.size(),cv::Point2d());
-//                    for(size_t i=0;i<pts.size();i++)
-//                    {
-//                        ptsd[i]=pts[i];
-//                    }
-
-//                    std::vector<cv::Point3d> pt3d(4,cv::Point3d(0,0,0));
-//                    pt3d[1].x=12;
-//                    pt3d[2].x=12;
-//                    pt3d[2].y=12;
-//                    pt3d[3].y=12;
-
-
-//                    cv::Vec3d r,t;
-
-//                    SolvePNPFisheye(ptsd,pt3d,r,t);
-
-
-//                }
-
-                cv::Vec3d tt=MarkerPos(m,12);
+                SendXYZ(file, tt[0],tt[1],tt[2]);
 
                 std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
 
@@ -282,9 +262,15 @@ public:
                 k=cv::waitKey(1);
 
             }
+            else
+            {
+                std::cout<<"fail read image\n"<<std::flush;
+
+                SendXYZ(file, 0, 0,-1);
+            }
         }
 
-
+        fclose(file);
 
 
     }
