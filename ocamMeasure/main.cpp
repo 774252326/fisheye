@@ -141,17 +141,21 @@ static void Test()
 
     mt.start();
 
-    QThread::sleep(1000);
+//    QThread::sleep(1000);
 }
 
 
 int main(int argc, char **argv)
 {
 
+
+
+
+//        test();
 //Test();
 
-//    OcamCV("2.1mm/calib_results800x600.txt").test2(640,480,0.8);
-//    return 0;
+    OcamCV("2.1mm/calib_results800x600.txt").test2(800,600,1);
+    return 0;
 
 //    struct ocam_model model;
 //    int flg0=get_ocam_model(&(model), "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\usb4\\calib_results.txt");
@@ -183,8 +187,6 @@ int main(int argc, char **argv)
     StereoOcam::DualCamTest3(th1,th2);
 
 
-
-//    test();
 
     return 0;
 }

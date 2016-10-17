@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "rs232.hpp"
+
+//#include "rs232.hpp"
 
 static int lost_count=6;
 #if 0
@@ -160,6 +161,42 @@ static void SendXYZ(FILE *file, float x, float y, float z)
     fflush(file);
 }
 
+
+
+static void test()
+{
+
+    srand(time(NULL));
+
+
+    FILE *file = fopen("/dev/ttyACM1", "w");
+
+    char buf[256];
+
+    for(int i=0;i<200;i++)
+    {
+        int ms=rand()%100+50;
+
+        SendXYZ(file,1,1,1);
+
+//        char msc=ms;
+//        fprintf(file, "%c%c", msc,msc); //Writing to the file
+//        fflush(file);
+
+        usleep(ms*1000);
+
+//        fscanf(file,"%s",buf);
+
+//        std::cout<<i<<"\t"<<msc<<"\t"<<ms<<"ms\n"
+//                <<"buf="<<buf<<"\n"<<std::flush;
+
+
+    }
+    fclose(file);
+}
+
+#if 0
+
 template<typename T>
 void SendValue(int comport_number, T value)
 {
@@ -208,36 +245,6 @@ bool SendValue(int comport_number, T value, int retry)
     return false;
 }
 
-static void test()
-{
-
-    srand(time(NULL));
-
-
-    FILE *file = fopen("/dev/ttyACM0", "rw");
-
-    char buf[256];
-
-    for(int i=0;i<200;i++)
-    {
-        int ms=rand()%100+50;
-
-        char msc=ms;
-        fprintf(file, "%c%c", msc,msc); //Writing to the file
-        fflush(file);
-
-        usleep(ms*1000);
-
-        fscanf(file,"%s",buf);
-
-        std::cout<<i<<"\t"<<msc<<"\t"<<ms<<"ms\n"
-                <<"buf="<<buf<<"\n"<<std::flush;
-
-
-    }
-    fclose(file);
-}
-
 static void test2()
 {
     int i=463,
@@ -281,5 +288,6 @@ static void test2()
     RS232::CloseComport(cport_nr);
 }
 
+#endif
 
 #endif // TOARDUINO_HPP
