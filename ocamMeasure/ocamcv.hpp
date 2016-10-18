@@ -152,10 +152,10 @@ public:
 
         std::vector< int > ids;
         std::vector< std::vector< cv::Point2f > > corners, rejected;
-
+clock_t t=clock();
         // detect markers and estimate pose
         cv::aruco::detectMarkers(m, dictionary, corners, ids, detectorParams, rejected);
-
+   std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
         if(corners.empty())
             pt.clear();
         else
@@ -165,8 +165,11 @@ public:
     cv::Vec3d MarkerPos(const cv::Mat &m, double length)
     {
         std::vector<cv::Point2f> pts;
+//clock_t t=clock();
 
         FindAR(m,pts);
+
+//        std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
 
         if(!pts.empty())
         {
@@ -242,7 +245,7 @@ public:
         c.read(m);
         cv::imwrite("capture.png",m);
 
-        FILE *file = fopen("/dev/ttyACM0", "w");
+//        FILE *file = fopen("/dev/ttyACM0", "w");
 
         int k=0;
         while(k!=27)
@@ -252,11 +255,11 @@ public:
             {
                 clock_t t=clock();
 
-                cv::Vec3d tt=MarkerPos(m,120);
+                cv::Vec3d tt=MarkerPos(m,80);
 
-                SendXYZ(file, tt[0],tt[1],tt[2]);
+//                SendXYZ(file, tt[0],tt[1],tt[2]);
 
-                std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
+                std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n\n\n"<<std::flush;
 
                 cv::imshow("f",m);
                 k=cv::waitKey(1);
@@ -266,11 +269,11 @@ public:
             {
                 std::cout<<"fail read image\n"<<std::flush;
 
-                SendXYZ(file, 0, 0,-1);
+//                SendXYZ(file, 0, 0,-1);
             }
         }
 
-        fclose(file);
+//        fclose(file);
 
 
     }

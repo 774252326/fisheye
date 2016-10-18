@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 //        test();
 //Test();
 
-    OcamCV("2.1mm/calib_results800x600.txt").test2(800,600,1);
+    OcamCV("2.1mm/calib_results1920x1080.txt").test2(1280,720,2.0/3);
     return 0;
 
 //    struct ocam_model model;

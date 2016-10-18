@@ -184,7 +184,7 @@ protected:
 
         double r   = sqrt(  xp*xp + yp*yp ); //distance [pixels] of  the point from the image center
 
-        std::cout<<length_pol<<"\n"<<std::flush;
+//        std::cout<<length_pol<<"\n"<<std::flush;
 
         double zp=PolyValue(pol,length_pol,r);
 
@@ -332,11 +332,11 @@ public:
         xc*=scale;
         yc*=scale;
 
-//        for(int i=0;i<length_pol;i++)
-//            pol[i]/=scale;
+        for(int i=0;i<length_pol;i++)
+            pol[i]*=pow(scale,1-i);
 
-//        for(int i=1;i<length_invpol;i++)
-//            invpol[i]*=pow(scale,i);
+        for(int i=0;i<length_invpol;i++)
+            invpol[i]*=scale;
 
     }
 
