@@ -13,9 +13,11 @@
 #include "fiocpp.hpp"
 #include "fioqt.hpp"
 
+#include "controlthread.hpp"
+
 //#define RECORDIMG
 #define OUTADN
-#define SOUND
+//#define SOUND
 
 class OcamCV
 {
@@ -334,6 +336,114 @@ public:
 #endif
 
     }
+
+
+
+    void test3(int w, int h, double scale,
+               double markerLength=120, std::string port="/dev/ttyACM0")
+    {
+        model.ScaleModel(scale);
+
+        cv::Mat m;
+
+        cv::VideoCapture c(0);
+
+        c.set(cv::CAP_PROP_FRAME_WIDTH, w);
+        c.set(cv::CAP_PROP_FRAME_HEIGHT,h);
+        c.set(cv::CAP_PROP_SETTINGS,1);
+
+        cv::namedWindow("f",cv::WINDOW_NORMAL);
+
+        c.read(m);
+//        cv::imwrite("capture.png",m);
+
+        QSemaphore s(1);
+
+#ifdef OUTADN
+        ControlThread ct(&s);
+        ct.port=port;
+        ct.start();
+#endif
+
+#ifdef RECORDIMG
+        std::string folder=TimeString();
+        SetFolder(folder);
+#endif
+
+#ifdef SOUND
+        NoticeThread mt;
+        mt.start();
+#endif
+        int k=0;
+        while(k!=27)
+        {
+
+            if(c.read(m))
+            {
+                clock_t t=clock();
+#ifdef RECORDIMG
+                cv::Mat m1;
+                m.copyTo(m1);
+#endif
+
+
+                cv::Vec3d tt=MarkerPos(m,markerLength);
+
+#ifdef RECORDIMG
+
+                if(tt[2]>0)
+                {
+                    std::string name=TimeString();
+                    cv::imwrite(folder+"/"+name+".png",m1);
+                    cv::imwrite(folder+"/"+name+"r.png",m);
+                }
+
+
+#endif
+
+#ifdef OUTADN
+                s.acquire();
+                ct.pos[0]=tt[0];
+                ct.pos[1]=tt[1];
+                ct.pos[2]=tt[2];
+                ct.dirtyflag=true;
+                s.release();
+//                ct.SetPos(tt);
+#endif
+                std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n\n\n"<<std::flush;
+#ifdef SOUND
+                if(tt[2]>0)
+                    if(tt[2]<1700)
+                        mt.index=2;
+                    else
+                        mt.index=0;
+                else
+                    mt.index=1;
+#endif
+                cv::imshow("f",m);
+                k=cv::waitKey(1);
+
+            }
+            else
+            {
+                std::cout<<"fail read image\n"<<std::flush;
+#ifdef OUTADN
+                ct.SetPos(cv::Vec3d(0,0,-1));
+#endif
+#ifdef SOUND
+                mt.index=1;
+#endif
+            }
+        }
+#ifdef SOUND
+        mt.index=-1;
+#endif
+#ifdef OUTADN
+       ct.goflag=false;
+#endif
+
+    }
+
 
 
 
