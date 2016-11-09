@@ -33,6 +33,14 @@ public:
         ps->release();
     }
 
+    void SetObj(bool flag)
+    {
+        ps->acquire();
+        objflag=flag;
+        dirtyflag=true;
+        ps->release();
+    }
+
     void run()
     {
         goflag=true;
@@ -41,18 +49,25 @@ public:
 
         while(goflag)
         {
-            if(objflag)
-            {
-                SendXYZ(file, 0, 0,-1);
-                msleep(1);
-                continue;
-            }
+//            if(objflag)
+//            {
+//                SendXYZ(file, 0, 0,-1);
+//                msleep(1);
+//                continue;
+//            }
 
 
             ps->acquire();
             if(dirtyflag)
             {
+                if(objflag)
+                {
+                    SendXYZ(file, 0, 0,-1);
+                }
+                else
+                {
                 SendXYZ(file, pos[0],pos[1],pos[2]);
+                }
                 dirtyflag=false;
             }
             ps->release();

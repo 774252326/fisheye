@@ -6,14 +6,21 @@
 #include <stdlib.h>
 #include "depth_render.h"
 
+#include "controlthread.hpp"
+
+//#define DPDEPTH
+
 class DepthThread : public QThread
 {
 public:
-    bool *pobjflag;
+//    bool *pobjflag;
     bool goflag;
 
-    DepthThread()
+    ControlThread *pct;
+
+    DepthThread(ControlThread *pct0)
         : goflag(false)
+        , pct(pct0)
     {
 
     }
@@ -56,13 +63,13 @@ public:
     void run()
     {
         goflag=true;
-
+#ifdef DPDEPTH
         DepthRender render;
         render.range_mode = DepthRender::COLOR_RANGE_DYNAMIC;
         render.color_type = DepthRender::COLORTYPE_BLUERED;
         render.invalid_label = 0;
         render.Init();
-
+#endif
         percipio::DepthCameraDevice port(percipio::MODEL_DPB04GN);
         percipio::SetLogLevel(percipio::LOG_LEVEL_INFO);
         port.SetCallbackUserData(NULL);
@@ -100,21 +107,23 @@ public:
                 cv::Mat depth;
                 CopyBuffer(&pimage, depth);
 
-                *pobjflag=CheckInRange(depth,600,900);
+                pct->SetObj(CheckInRange(depth,600,900));
 
-
+#ifdef DPDEPTH
                 cv::Mat t;
                 render.Compute(depth, t);
                 cv::imshow("depth", t);
-
-
+                msleep(1);
+#endif
             }
-            msleep(1);
+
         }
 
 
         port.CloseDevice();
+#ifdef DPDEPTH
         render.Uninit();
+#endif
     }
 };
 

@@ -173,7 +173,7 @@ public:
         else
         {
             pt.assign(corners[0].begin(),corners[0].end());
-//            std::cout<<"id="<<ids[0]<<'\n';
+            //            std::cout<<"id="<<ids[0]<<'\n';
         }
     }
 
@@ -355,7 +355,7 @@ public:
         cv::namedWindow("f",cv::WINDOW_NORMAL);
 
         c.read(m);
-//        cv::imwrite("capture.png",m);
+        //        cv::imwrite("capture.png",m);
 
         QSemaphore s(1);
 
@@ -365,13 +365,13 @@ public:
         ControlThread ct(&s);
         ct.port=port;
         ct.start();
-#endif
-
 #ifdef DEPTHS
-        DepthThread dt;
-        dt.pobjflag=&ct.objflag;
+        DepthThread dt(&ct);
         dt.start();
 #endif
+#endif
+
+
 
 #ifdef RECORDIMG
         std::string folder=TimeString();
@@ -408,13 +408,13 @@ public:
 #endif
 
 #ifdef OUTADN
-                s.acquire();
-                ct.pos[0]=tt[0];
-                ct.pos[1]=tt[1];
-                ct.pos[2]=tt[2];
-                ct.dirtyflag=true;
-                s.release();
-//                ct.SetPos(tt);
+                //                s.acquire();
+                //                ct.pos[0]=tt[0];
+                //                ct.pos[1]=tt[1];
+                //                ct.pos[2]=tt[2];
+                //                ct.dirtyflag=true;
+                //                s.release();
+                ct.SetPos(tt);
 #endif
                 std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n\n\n"<<std::flush;
 #ifdef SOUND
@@ -445,12 +445,13 @@ public:
         mt.index=-1;
 #endif
 #ifdef OUTADN
-       ct.goflag=false;
+        ct.goflag=false;
+#ifdef DEPTHS
+        dt.goflag=false;
+#endif
 #endif
 
-#ifdef DEPTHS
-       dt.goflag=false;
-#endif
+
 
     }
 
