@@ -1,3 +1,4 @@
+
 #ifndef OCAMCV_HPP
 #define OCAMCV_HPP
 #include <opencv2/opencv.hpp>
@@ -6,6 +7,15 @@
 //#include "Head2Base.hpp"
 #include <opencv2/aruco.hpp>
 #include "ToArduino.hpp"
+
+#include "noticethread.hpp"
+
+#include "fiocpp.hpp"
+#include "fioqt.hpp"
+
+//#define RECORDIMG
+#define OUTADN
+#define SOUND
 
 class OcamCV
 {
@@ -152,24 +162,27 @@ public:
 
         std::vector< int > ids;
         std::vector< std::vector< cv::Point2f > > corners, rejected;
-clock_t t=clock();
+        //        clock_t t=clock();
         // detect markers and estimate pose
         cv::aruco::detectMarkers(m, dictionary, corners, ids, detectorParams, rejected);
-   std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
-        if(corners.empty())
+        //        std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
+        if(corners.empty() || ids[0]!=2)
             pt.clear();
         else
+        {
             pt.assign(corners[0].begin(),corners[0].end());
+//            std::cout<<"id="<<ids[0]<<'\n';
+        }
     }
 
     cv::Vec3d MarkerPos(const cv::Mat &m, double length)
     {
         std::vector<cv::Point2f> pts;
-//clock_t t=clock();
+        //clock_t t=clock();
 
         FindAR(m,pts);
 
-//        std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
+        //        std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
 
         if(!pts.empty())
         {
@@ -228,7 +241,8 @@ clock_t t=clock();
     }
 
 
-    void test2(int w, int h, double scale)
+    void test2(int w, int h, double scale,
+               double markerLength=120, std::string port="/dev/ttyACM0")
     {
         model.ScaleModel(scale);
 
@@ -244,9 +258,19 @@ clock_t t=clock();
 
         c.read(m);
         cv::imwrite("capture.png",m);
+#ifdef OUTADN
+        FILE *file = fopen(port.c_str(), "w");
+#endif
 
-//        FILE *file = fopen("/dev/ttyACM0", "w");
+#ifdef RECORDIMG
+        std::string folder=TimeString();
+        SetFolder(folder);
+#endif
 
+#ifdef SOUND
+        NoticeThread mt;
+        mt.start();
+#endif
         int k=0;
         while(k!=27)
         {
@@ -254,13 +278,39 @@ clock_t t=clock();
             if(c.read(m))
             {
                 clock_t t=clock();
+#ifdef RECORDIMG
+                cv::Mat m1;
+                m.copyTo(m1);
+#endif
 
-                cv::Vec3d tt=MarkerPos(m,80);
 
-//                SendXYZ(file, tt[0],tt[1],tt[2]);
+                cv::Vec3d tt=MarkerPos(m,markerLength);
 
+#ifdef RECORDIMG
+
+                if(tt[2]>0)
+                {
+                    std::string name=TimeString();
+                    cv::imwrite(folder+"/"+name+".png",m1);
+                    cv::imwrite(folder+"/"+name+"r.png",m);
+                }
+
+
+#endif
+
+#ifdef OUTADN
+                SendXYZ(file, tt[0],tt[1],tt[2]);
+#endif
                 std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n\n\n"<<std::flush;
-
+#ifdef SOUND
+                if(tt[2]>0)
+                    if(tt[2]<1700)
+                        mt.index=2;
+                    else
+                        mt.index=0;
+                else
+                    mt.index=1;
+#endif
                 cv::imshow("f",m);
                 k=cv::waitKey(1);
 
@@ -268,13 +318,20 @@ clock_t t=clock();
             else
             {
                 std::cout<<"fail read image\n"<<std::flush;
-
-//                SendXYZ(file, 0, 0,-1);
+#ifdef OUTADN
+                SendXYZ(file, 0, 0,-1);
+#endif
+#ifdef SOUND
+                mt.index=1;
+#endif
             }
         }
-
-//        fclose(file);
-
+#ifdef SOUND
+        mt.index=-1;
+#endif
+#ifdef OUTADN
+        fclose(file);
+#endif
 
     }
 

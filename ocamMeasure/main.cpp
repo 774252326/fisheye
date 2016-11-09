@@ -1,5 +1,5 @@
 
-#include "stereoocam.hpp"
+//#include "stereoocam.hpp"
 #include "ocamcv.hpp"
 
 
@@ -65,8 +65,8 @@ public:
             sp->acquire();
             std::cout<<name<<"   "<<"\n"<<std::flush;
 
-//            p->c.read(p->m[1-p->idx]);
-//            p->idx=1-p->idx;
+            //            p->c.read(p->m[1-p->idx]);
+            //            p->idx=1-p->idx;
 
             p->Capture();
 
@@ -102,12 +102,12 @@ public:
             sc->acquire();
             std::cout<<name<<"   a"<<"\n"<<std::flush;
 
-//            cv::Mat mg;
-//            cv::cvtColor(p->m[p->idx],mg,CV_BGR2GRAY);
+            //            cv::Mat mg;
+            //            cv::cvtColor(p->m[p->idx],mg,CV_BGR2GRAY);
 
-//            cv::imshow("f",mg);
+            //            cv::imshow("f",mg);
 
-//            p->k=cv::waitKey(1);
+            //            p->k=cv::waitKey(1);
             p->Process();
 
             sp->release();
@@ -141,42 +141,35 @@ static void Test()
 
     mt.start();
 
-//    QThread::sleep(1000);
+    //    QThread::sleep(1000);
 }
 
 
 int main(int argc, char **argv)
 {
-
-
-
-
-//        test();
-//Test();
-
-    OcamCV("2.1mm/calib_results1920x1080.txt").test2(1280,720,2.0/3);
-    return 0;
-
-//    struct ocam_model model;
-//    int flg0=get_ocam_model(&(model), "C:\\Users\\jhanbin\\Desktop\\piS\\untitled\\usb4\\calib_results.txt");
-
-//    double p=model.width/2;
-//    double fp=PolyValue(model.pol,model.length_pol,p);
-//    double theta=atan2(p,fp);
-
-//    std::cout<<"theta="<<theta<<'\n'<<std::flush;
-
-//    double D=300;
-//    double markerl=theta/640*D*6*3;
-
-// std::cout<<"markerl="<<markerl<<'\n'<<std::flush;
-
-//    return 1;
+#if 1
 
     if(argc!=3)
     {
-         StereoOcam::DualCamTest3();
-         return 0;
+        OcamCV("2.1mm/calib_results1920x1080.txt").test2(1280,720,2.0/3);
+        return 0;
+    }
+    double length;
+    std::istringstream(argv[1])>>length;
+    std::string port(argv[2]);
+    std::cout<<length<<'\n'<<port<<'\n';
+    OcamCV("2.1mm/calib_results1920x1080.txt").test2(1280,720,2.0/3,length,port);
+    return 0;
+#endif
+
+    //        test();
+    //Test();
+
+#if 0
+    if(argc!=3)
+    {
+        StereoOcam::DualCamTest3();
+        return 0;
     }
 
 
@@ -185,7 +178,7 @@ int main(int argc, char **argv)
     std::istringstream(argv[1])>>th1;
     std::istringstream(argv[2])>>th2;
     StereoOcam::DualCamTest3(th1,th2);
-
+#endif
 
 
     return 0;

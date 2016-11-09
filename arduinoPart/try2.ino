@@ -45,45 +45,22 @@
 // ****************************************************
 #include <SoftwareSerial.h>
 #include <Sabertooth.h>
-//#include <SPI.h>  
-//#include <Pixy.h>
 #include <stdio.h>
-//#include <Timer.h>
 // *********************
 // Define hardware pins
 // *********************
 #define sabertoothEstop 4 // This is connected to S2 on the motor controllers. 
 // When this pin is pulled low the motors will stop.
-#define left -1
-#define right 1
-#define search_count_constant 3
-#define lost_count_constant 6
-#define tolar 11
-//#define tolar 20
-#define MAXrangeofA 330
+
 #define distance 600 //unit is mm
-#define back_speed_min -40
 
 // Declaration of the software serial UART and motor controller objects
 SoftwareSerial SWSerial(2, 3); // RX on pin 2 (unused), TX on pin 3 (to S1).
 Sabertooth frontSaber(128, SWSerial); // Address 128, front motors, 1 = left, 2 = right
 Sabertooth rearSaber(129, SWSerial);  // Address 130, rear motors, 1 = left, 2 = right
-//Pixy pixy;
-int x,y;
-int buf_wheel = 0;
-int state = 0; // 0 = stop 1 = forward 2 = backward 3 = left = 4 = right
-int next_state = 0;
-int MAX_Speed = 70; //Range from 0 - 98
-int Object_width = 50;
-int new_s, new_d;
+
 int s,d;
-int accel_constant = 10;
-int Object_side = 0;
-int search = 0;
-int car_stop = 0;
-int search_finish = search_count_constant;
-int lost_count = lost_count_constant;
-int x_adjust = MAXrangeofA/160;
+
 //******************************************************************************
 // Sets up our serial com, hardware pins, SPI bus for ethernet shield and motor controller.
 // RETURNS: Nothing
@@ -98,13 +75,23 @@ int ina,inb,inc;
 unsigned long times;
 //================TIMER====================
 
-//Timer t;
-
 int speeda=25;
-float upratioa=0.6;
+float upratioa=0.5;
 int speedb=15;
-float upratiob=0.2;
+float upratiob=0.7;
 float stoptangent=0.12;
+
+
+float SpeedOutput(float input, float minInput, float minSpeed, float maxInput, float maxSpeed)
+{
+    if(input<=minInput)
+        return minSpeed;
+    if(input>=maxInput)
+        return maxSpeed;
+    return minSpeed+(input-minInput)*(maxSpeed-minSpeed)/(maxInput-minInput);
+}
+
+
 
 
 void setup() 
@@ -126,7 +113,7 @@ void setup()
     pinMode(sabertoothEstop, OUTPUT);
 
     //  allStop();    // Make sure all motors are stopped for safety
-    //  pixy.init();
+
     Serial.println("Start");
 
 }
@@ -144,52 +131,56 @@ void setup()
 void loop() 
 {
 
-    int x = 0; //range 0 to 319
+//    int x = 0; //range 0 to 319
 
-    //==============================prevent over flow====================================
-    if(fa > 32767) fa = 32767;
-    else if(fa < -32768) fa = -32768;
-    if(fb > 32767) fb = 32767;
-    else if(fb < -32768) fb = -32768;
-    if(fc > 32767) fc = 32767;
-    else if(fc < -32768) fc = -1;
-    //==============================convert to int ========================================
-    ina = fa;
-    inb = fb;
-    inc = fc;
+//    //==============================prevent over flow====================================
+//    if(fa > 32767) fa = 32767;
+//    else if(fa < -32768) fa = -32768;
+//    if(fb > 32767) fb = 32767;
+//    else if(fb < -32768) fb = -32768;
+//    if(fc > 32767) fc = 32767;
+//    else if(fc < -32768) fc = -1;
+//    //==============================convert to int ========================================
+//    ina = fa;
+//    inb = fb;
+//    inc = fc;
     
 
 
-    if(inc>0)
-    {
-        if(inc>distance)
-        {
-            d=d*upratioa+speeda*(1-upratioa);
-        }
-        else
-        {
-            d=d*upratioa;
-        }
-
-        if(ina>inc*stoptangent)
-        {
-            s=s*upratiob+speedb*(1-upratiob);
-        }
-        else
-        {
-            if(ina>-inc*stoptangent)
-                s=0;
-            else
-                s=s*upratiob-speedb*(1-upratiob);
-        }
-    }
-    else
-    {
-        d=d*upratioa;
-        s=s*upratiob;
-    }
 
 
+//    if(inc>0)
+//    {
+//        if(inc>distance)
+//        {
+//            d=d*upratioa+speeda*(1-upratioa);
+//        }
+//        else
+//        {
+//            d=d*upratioa;
+//        }
+
+//        if(ina>inc*stoptangent)
+//        {
+//            s=s*upratiob+speedb*(1-upratiob);
+//        }
+//        else
+//        {
+//            if(ina>-inc*stoptangent)
+//                s=0;
+//            else
+//                s=s*upratiob-speedb*(1-upratiob);
+//        }
+//    }
+//    else
+//    {
+//        d=d*upratioa;
+//        s=s*upratiob;
+//    }
+
+
+    d=d*upratioa+(1-upratioa)*SpeedOutput(fc, 600, 0, 1000, 90);
+    s=s*upratiob+(1-upratiob)*SpeedOutput(atan(fa/fc), -0.8, -40, 0.8, 40);
 
     // ****************  update the speed  ******************* //
 
@@ -198,6 +189,13 @@ void loop()
     delay(50);
     //delay(50);
 }
+
+
+
+
+
+
+
 //******************************************************************************
 // Sets the speed of all motor controllers to zero and sets all ESTOPs
 // RETURNS: NONE
@@ -212,14 +210,6 @@ void serialEvent(){
 
         input = Serial.readString();
         input.toCharArray(info,32);
-
-        //  int ib=Serial.read();
-        //   int ib2=Serial.read();
-
-        //   Serial.print("parse: ");
-        //   Serial.print(ib);
-        //       Serial.print("parse2: ");
-        //   Serial.print(ib2);
 
         Serial.print("Time : ");
         Serial.print(times);
@@ -237,15 +227,9 @@ void serialEvent(){
         fa = atof(a);
         fb = atof(b);
         fc = atof(c);
-        //Serial.flush();
+
     }Serial.flush();
 
-}
-
-int detect(){
-    if(inc >= 0)
-        return 1;
-    else return 0;
 }
 
 void printdata(){

@@ -147,6 +147,7 @@ HEADERS += \
     Measure.hpp \
     ToArduino.hpp \
     ocamcv.hpp \
-    ocam_model.hpp
+    ocam_model.hpp \
+    noticethread.hpp
 
 
