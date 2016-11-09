@@ -15,9 +15,12 @@
 
 #include "controlthread.hpp"
 
+#include "depththread.hpp"
+
 //#define RECORDIMG
 #define OUTADN
 //#define SOUND
+#define DEPTHS
 
 class OcamCV
 {
@@ -68,9 +71,6 @@ public:
         cv::Mat R0 = (U*Vt).t();
         return R0;
     }
-
-
-
 
 
     void SolvePNPFisheye(const std::vector<cv::Point2d> &pixel,
@@ -359,10 +359,18 @@ public:
 
         QSemaphore s(1);
 
+
+
 #ifdef OUTADN
         ControlThread ct(&s);
         ct.port=port;
         ct.start();
+#endif
+
+#ifdef DEPTHS
+        DepthThread dt;
+        dt.pobjflag=&ct.objflag;
+        dt.start();
 #endif
 
 #ifdef RECORDIMG
@@ -397,8 +405,6 @@ public:
                     cv::imwrite(folder+"/"+name+".png",m1);
                     cv::imwrite(folder+"/"+name+"r.png",m);
                 }
-
-
 #endif
 
 #ifdef OUTADN
@@ -440,6 +446,10 @@ public:
 #endif
 #ifdef OUTADN
        ct.goflag=false;
+#endif
+
+#ifdef DEPTHS
+       dt.goflag=false;
 #endif
 
     }
