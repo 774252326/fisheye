@@ -416,7 +416,7 @@ public:
                 //                s.release();
                 ct.SetPos(tt);
 #endif
-                std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n\n\n"<<std::flush;
+//                std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n\n\n"<<std::flush;
 #ifdef SOUND
                 if(tt[2]>0)
                     if(tt[2]<1700)

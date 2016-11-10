@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 
     if(argc!=3)
     {
-        OcamCV("2.1mm/calib_results1920x1080.txt").test2(1280,720,2.0/3);
+        OcamCV("2.1mm/calib_results1920x1080.txt").test3(1280,720,2.0/3);
         return 0;
     }
     double length;

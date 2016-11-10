@@ -13,7 +13,7 @@
 class DepthThread : public QThread
 {
 public:
-//    bool *pobjflag;
+    //    bool *pobjflag;
     bool goflag;
 
     ControlThread *pct;
@@ -73,7 +73,7 @@ public:
         percipio::DepthCameraDevice port(percipio::MODEL_DPB04GN);
         percipio::SetLogLevel(percipio::LOG_LEVEL_INFO);
         port.SetCallbackUserData(NULL);
-        port.SetFrameReadyCallback(frame_arrived_callback);
+        port.SetFrameReadyCallback(NULL);
 
         int ver = percipio::LibVersion();
         printf("Sdk version is %d\n", ver);
@@ -81,7 +81,7 @@ public:
         int ret = port.OpenDevice();
         if (percipio::CAMSTATUS_SUCCESS != ret) {
             printf("open device failed\n");
-            return -1;
+            return ;
         }
 
         int wait_time;
@@ -93,29 +93,31 @@ public:
         //int reti = port.SetProperty_Int(percipio::PROP_WORKMODE, percipio::WORKMODE_IR_DEPTH);
         if (reti < 0) {
             printf("set mode failed,error code:%d\n", reti);
-            return -1;
+            return ;
         }
 
 
 
         while(goflag){
+            if (port.FramePackageGet() == percipio::CAMSTATUS_SUCCESS) {
+                percipio::ImageBuffer pimage;
 
-            percipio::ImageBuffer pimage;
 
-            int ret = port.FrameGet(percipio::CAMDATA_DEPTH, &pimage);
-            if (percipio::CAMSTATUS_SUCCESS == ret) {
-                cv::Mat depth;
-                CopyBuffer(&pimage, depth);
+                if (percipio::CAMSTATUS_SUCCESS == port.FrameGet(percipio::CAMDATA_DEPTH, &pimage)) {
+                    cv::Mat depth;
+                    CopyBuffer(&pimage, depth);
+                    pct->SetObj(CheckInRange(depth,600,900));
 
-                pct->SetObj(CheckInRange(depth,600,900));
-
+                    std::cout << "depth thread\n"<<std::flush;
 #ifdef DPDEPTH
-                cv::Mat t;
-                render.Compute(depth, t);
-                cv::imshow("depth", t);
-                msleep(1);
+                    cv::Mat t;
+                    render.Compute(depth, t);
+                    cv::imshow("depth", t);
+                    msleep(1);
 #endif
+                }
             }
+
 
         }
 
