@@ -15,12 +15,12 @@
 
 #include "controlthread.hpp"
 
-#include "depththread.hpp"
+//#include "depththread.hpp"
 
 //#define RECORDIMG
 #define OUTADN
 //#define SOUND
-#define DEPTHS
+//#define DEPTHS
 
 class OcamCV
 {
@@ -350,7 +350,7 @@ public:
 
         c.set(cv::CAP_PROP_FRAME_WIDTH, w);
         c.set(cv::CAP_PROP_FRAME_HEIGHT,h);
-        c.set(cv::CAP_PROP_SETTINGS,1);
+//        c.set(cv::CAP_PROP_SETTINGS,1);
 
         cv::namedWindow("f",cv::WINDOW_NORMAL);
 
@@ -451,7 +451,7 @@ public:
 #endif
 #endif
 
-
+    cv::waitKey(1000);
 
     }
 
