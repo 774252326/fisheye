@@ -1,45 +1,3 @@
-\
-//=========================HEADER=============================================================
-/*
-   Quad ATR Mecanum with Sabertooth
-   AUTHOR: Jason Traud
-   DATE: 6/8/2015
-   
-   This firmware demonstrates basic movement routines on a Mecanum ATR with a Sabertooth
-   motor controller.
-   
-   Hardware:
-   
-     Arduino Uno R3       (MCU-050-000)
-     Programmable Mecanum (TP-095-004)
-     Sabertooth 2x25      (TE-091-225)
-
-   Connections:
-
-     Arduino D3   -   Sabertooth S1 (Serial COM)
-     Arduino D4   -   Sabertooth S2 (Emergency Stop)
-     Arduino Gnd  -   Sabertooth 0V (A common ground is needed for stable communication)
-     
-   DIP Switch Settings:
-   
-     00 11 11 (Address 128, front)
-     00 10 11 (Address 129, rear)
-     
-   Support:
-
-     SuperDroid Robots Support Forum
-       http://www.sdrobots.com/forums/
-
-     Vectoring Robot Support Page
-       http://www.superdroidrobots.com/shop/custom.aspx/vectoring-robots/44/
-
-
-
-   License: CCAv3.0 Attribution-ShareAlike (http://creativecommons.org/licenses/by-sa/3.0/)
-   You're free to use this code for any venture. Attribution is greatly appreciated.
-//============================================================================================
-*/
-
 // ****************************************************
 // Libraries
 // ****************************************************
@@ -52,49 +10,17 @@
 #define sabertoothEstop 4 // This is connected to S2 on the motor controllers. 
 // When this pin is pulled low the motors will stop.
 
-#define distance 600 //unit is mm
-
 // Declaration of the software serial UART and motor controller objects
 SoftwareSerial SWSerial(2, 3); // RX on pin 2 (unused), TX on pin 3 (to S1).
 Sabertooth frontSaber(128, SWSerial); // Address 128, front motors, 1 = left, 2 = right
 Sabertooth rearSaber(129, SWSerial);  // Address 130, rear motors, 1 = left, 2 = right
-
-int s,d;
-
 //******************************************************************************
 // Sets up our serial com, hardware pins, SPI bus for ethernet shield and motor controller.
 // RETURNS: Nothing
 //******************************************************************************
 
-//==============================communicate with Pi==========================================
-String input;
-char info[32];
-char *a,*b,*c;
-float fa,fb,fc;
-int ina,inb,inc;
-unsigned long times;
-//================TIMER====================
 
-int speeda=25;
-float upratioa=0.5;
-int speedb=15;
-float upratiob=0.7;
-float stoptangent=0.12;
-
-
-float SpeedOutput(float input, float minInput, float minSpeed, float maxInput, float maxSpeed)
-{
-    if(input<=minInput)
-        return minSpeed;
-    if(input>=maxInput)
-        return maxSpeed;
-    return minSpeed+(input-minInput)*(maxSpeed-minSpeed)/(maxInput-minInput);
-}
-
-
-
-
-void setup() 
+void setupMotors()
 {
 
     delay(1000);           // Short delay to allow the motor controllers
@@ -102,8 +28,6 @@ void setup()
     // If you try to talk to them before the finish booting
     // they can lock up and be unresponsive
 
-    Serial.begin(19200);    // Serial for the debug output
-    Serial.setTimeout(5);
     SWSerial.begin(9600);  // Serial for the motor controllers
 
     frontSaber.autobaud(); // Allows the motor controllers to detect the baud rate
@@ -113,141 +37,8 @@ void setup()
     pinMode(sabertoothEstop, OUTPUT);
 
     //  allStop();    // Make sure all motors are stopped for safety
-
-    Serial.println("Start");
-
 }
 
-//******************************************************************************
-// This is our main program loop and is wrapped in an implied while(true) loop.
-// This sample code demonstrates example movement for the robot and alternates
-// through the motions by calling the commandMotors function. 
-// 
-// Description of the type of movement and the power level sent is printed to
-// the serial console at a baud rate of 9600
-// 
-// RETURNS: Nothing
-//******************************************************************************
-void loop() 
-{
-
-//    int x = 0; //range 0 to 319
-
-//    //==============================prevent over flow====================================
-//    if(fa > 32767) fa = 32767;
-//    else if(fa < -32768) fa = -32768;
-//    if(fb > 32767) fb = 32767;
-//    else if(fb < -32768) fb = -32768;
-//    if(fc > 32767) fc = 32767;
-//    else if(fc < -32768) fc = -1;
-//    //==============================convert to int ========================================
-//    ina = fa;
-//    inb = fb;
-//    inc = fc;
-    
-
-
-
-
-//    if(inc>0)
-//    {
-//        if(inc>distance)
-//        {
-//            d=d*upratioa+speeda*(1-upratioa);
-//        }
-//        else
-//        {
-//            d=d*upratioa;
-//        }
-
-//        if(ina>inc*stoptangent)
-//        {
-//            s=s*upratiob+speedb*(1-upratiob);
-//        }
-//        else
-//        {
-//            if(ina>-inc*stoptangent)
-//                s=0;
-//            else
-//                s=s*upratiob-speedb*(1-upratiob);
-//        }
-//    }
-//    else
-//    {
-//        d=d*upratioa;
-//        s=s*upratiob;
-//    }
-
-
-    d=d*upratioa+(1-upratioa)*SpeedOutput(fc, 600, 0, 1000, 90);
-    s=s*upratiob+(1-upratiob)*SpeedOutput(atan(fa/fc), -0.8, -40, 0.8, 40);
-
-    // ****************  update the speed  ******************* //
-
-    commandMotors(127 + d ,127,127 + s,1);
-
-    delay(50);
-    //delay(50);
-}
-
-
-
-
-
-
-
-//******************************************************************************
-// Sets the speed of all motor controllers to zero and sets all ESTOPs
-// RETURNS: NONE
-//******************************************************************************
-
-//================================read data=====================================
-
-void serialEvent(){
-    if(Serial.available() > 0){
-
-        times = millis() - times;
-
-        input = Serial.readString();
-        input.toCharArray(info,32);
-
-        Serial.print("Time : ");
-        Serial.print(times);
-        times = millis();
-        Serial.println("ms");
-
-        Serial.println(input);
-        Serial.print(d);
-        Serial.print("\t");
-        Serial.print(s);
-
-        a = strtok(info,",");
-        b = strtok(NULL,",");
-        c = strtok(NULL,",");
-        fa = atof(a);
-        fb = atof(b);
-        fc = atof(c);
-
-    }Serial.flush();
-
-}
-
-void printdata(){
-    noInterrupts();
-    if(Serial.available() <= 0) {
-        Serial.println(a[0]);
-        Serial.print("a = ");
-        Serial.println(ina);
-        Serial.println(fa);
-        Serial.print("b = ");
-        Serial.println(inb);
-        Serial.println(fb);
-        Serial.print("c = ");
-        Serial.println(inc);
-        Serial.println(fc);
-        interrupts();
-    }
-}
 
 
 //================================finash read data ===================================
