@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     c.open( 1 );
+//    c.set(cv::CAP_PROP_FRAME_WIDTH, 2592);
+//    c.set(cv::CAP_PROP_FRAME_HEIGHT, 1944);
 
     startTimer(0);
 }
@@ -22,6 +24,8 @@ void MainWindow::timerEvent(QTimerEvent *event)
 {
     cv::Mat image;
     c >> image;
+
+//    std::cout<<image.size()<<std::flush;
 
     QImage mRenderQtImg = QImage((const unsigned char*)(image.data),
                                  image.cols, image.rows,
