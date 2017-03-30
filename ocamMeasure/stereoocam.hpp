@@ -3,8 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 
-//#include "ocam_functions.h"
-#include "ocam_model.hpp"
+#include "fisheyemodel.hpp"
 
 #include "Measure.hpp"
 
@@ -29,7 +28,7 @@ private:
         return false;
     }
 public:
-    ocam_model model[2];
+    FisheyeModel model[2];
 
     cv::Mat rt;
 
@@ -51,7 +50,7 @@ public:
     }
 
 
-    static cv::Mat CeilMask(double hceil, double rejectRadius, ocam_model * pm)
+    static cv::Mat CeilMask(double hceil, double rejectRadius, FisheyeModel * pm)
     {
         cv::Mat mask(pm->height, pm->width, CV_8UC1, cv::Scalar(255));
 
@@ -59,16 +58,16 @@ public:
         {
             for(int j=0;j<mask.cols;j++)
             {
-                double pt2[2]={i,j};
-                double pt3[3];
                 pm->cam2world(pt3,pt2);
 
-                if(pt3[0]<0)
-                {
-                    pt3[1]*=hceil/pt3[0];
-                    pt3[2]*=hceil/pt3[0];
+                cv::Point3d pt3=pm->Cam2WorldUnit(cv::Point2d(j,i));
 
-                    if(pt3[1]*pt3[1]+pt3[2]*pt3[2]<rejectRadius*rejectRadius)
+                if(pt3.y<0)
+                {
+                    pt3.x*=hceil/pt3.y;
+                    pt3.z*=hceil/pt3.y;
+
+                    if(pt3.x*pt3.x+pt3.z*pt3.z<rejectRadius*rejectRadius)
                         mask.at<uchar>(i,j)=0;
                 }
 
@@ -84,12 +83,8 @@ public:
 
     bool Triangulate(cv::Vec3d &p, cv::Point2f led0, cv::Point2f led1)
     {
-        double point2D[2][2]={{led0.y,led0.x},{led1.y,led1.x}};
-        double point3D[2][3];
-
-        model[0].cam2world(point3D[0], point2D[0]);
-        model[1].cam2world(point3D[1], point2D[1]);
-
+        cv::Point3d point0=model[0].Cam2WorldUnit(cv::Point2d(led0));
+        cv::Point3d point1=model[1].Cam2WorldUnit(cv::Point2d(led1));
 
         cv::Mat R;
         cv::Rodrigues(rt.rowRange(0,3),R);
@@ -98,10 +93,10 @@ public:
 
         cv::Vec3d ray[2][2];
         ray[0][0]=cv::Vec3d(0,0,0);
-        ray[0][1]=cv::Vec3d(point3D[0][1],point3D[0][0],-point3D[0][2]);
+        ray[0][1]=cv::Vec3d(point0.x, point0.y, point0.z);
         ray[1][0]=cv::Vec3d(rt.rowRange(3,6));
 
-        cv::Mat ray11=R*(cv::Mat_<double>(3,1)<<point3D[1][1],point3D[1][0],-point3D[1][2]);
+        cv::Mat ray11=R*(cv::Mat_<double>(3,1)<<point1.x, point1.y, point1.z);
         ray[1][1]=cv::Vec3d(ray11);
 
         //        std::cout<<"ray="<<ray[0][0]<<'\n'
@@ -157,7 +152,7 @@ public:
 #endif
 
 
-        #ifdef CEILMASK
+#ifdef CEILMASK
         double radius=6000;
         double hceil=3500-1000;
 
@@ -166,13 +161,13 @@ public:
         mask[1]=CeilMask(hceil+soc.rt.at<double>(4),radius,&(soc.model[0]));
 
 
-                cv::imshow("mask0",mask[0]);
-                cv::imshow("mask1",mask[1]);
-                cv::imwrite("mask0.png",mask[0]);
-                cv::imwrite("mask1.png",mask[1]);
-                cv::waitKey();
-                cv::destroyWindow("mask0");
-                cv::destroyWindow("mask1");
+        cv::imshow("mask0",mask[0]);
+        cv::imshow("mask1",mask[1]);
+        cv::imwrite("mask0.png",mask[0]);
+        cv::imwrite("mask1.png",mask[1]);
+        cv::waitKey();
+        cv::destroyWindow("mask0");
+        cv::destroyWindow("mask1");
 #endif
 
         cv::Mat image[2];
@@ -185,14 +180,14 @@ public:
         c[0].set(CV_CAP_PROP_FRAME_WIDTH, 640);
         c[0].set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
-//        c[0].set(CV_CAP_PROP_EXPOSURE,-13);
-//        c[0].set(CV_CAP_PROP_GAIN,0);
+        //        c[0].set(CV_CAP_PROP_EXPOSURE,-13);
+        //        c[0].set(CV_CAP_PROP_GAIN,0);
 
         c[1].set(CV_CAP_PROP_FRAME_WIDTH, 640);
         c[1].set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
-//        c[1].set(CV_CAP_PROP_EXPOSURE,-13);
-//        c[1].set(CV_CAP_PROP_GAIN,0);
+        //        c[1].set(CV_CAP_PROP_EXPOSURE,-13);
+        //        c[1].set(CV_CAP_PROP_GAIN,0);
 
         int k=0;
 
@@ -202,10 +197,10 @@ public:
 
 #ifdef VSN
         FILE *file = fopen("/dev/ttyACM0", "w");
-//        FILE *file = fopen("/dev/ttyUSB0", "w");
+        //        FILE *file = fopen("/dev/ttyUSB0", "w");
 #else
         int cport_nr=24,        /* /dev/ttyS0 (COM1 on windows) */
-        bdrate=19200;       /* 9600 baud */
+                bdrate=19200;       /* 9600 baud */
         char mode[]={'8','N','1',0};
 
         if(RS232::OpenComport(cport_nr, bdrate, mode))
@@ -224,7 +219,7 @@ public:
             if(c[0].read(image[0]) && c[1].read(image[1]))
             {
 
-//                             clock_t t=clock();
+                //                             clock_t t=clock();
 
                 cv::Point2f led1,led2;
 
@@ -236,9 +231,9 @@ public:
                         //&& cv::norm(p)>600
                         )
 #else
-                                    if(FindLed1(image[0],led1,thres1)
-                                            && FindLed1(image[1],led2,thres2)
-                    && soc.Triangulate(p,led1,led2))
+                if(FindLed1(image[0],led1,thres1)
+                        && FindLed1(image[1],led2,thres2)
+                        && soc.Triangulate(p,led1,led2))
 #endif
                 {
 
@@ -273,7 +268,7 @@ public:
 #endif
                 }
 
-//                               std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
+                //                               std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n"<<std::flush;
 #ifdef CEILMASK
                 image[0].setTo(0,255-mask[0]);
                 image[1].setTo(0,255-mask[1]);

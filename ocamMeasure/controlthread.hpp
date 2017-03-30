@@ -19,6 +19,7 @@ public:
     ControlThread(QSemaphore *s0)
         : ps(s0)
         , goflag(false)
+        , objflag(false)
     {
 
     }
