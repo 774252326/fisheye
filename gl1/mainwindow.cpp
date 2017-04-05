@@ -7,9 +7,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    c.open( 1 );
-//    c.set(cv::CAP_PROP_FRAME_WIDTH, 2592);
-//    c.set(cv::CAP_PROP_FRAME_HEIGHT, 1944);
+//    c.open("Z:\\Project Share Folder\\JIAN\\Entaniya Fisheye 280 on GoPro HERO 4 Direct mount.mp4");
+
+    c.open( 0 );
+    c.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+    c.set(cv::CAP_PROP_FRAME_HEIGHT, 1024);
 
     startTimer(0);
 }
@@ -23,9 +25,15 @@ MainWindow::~MainWindow()
 void MainWindow::timerEvent(QTimerEvent *event)
 {
     cv::Mat image;
-    c >> image;
+    if(!c.read(image))
+    {
+        killTimer(0);
+        c.release();
+        return;
+    }
 
-//    std::cout<<image.size()<<std::flush;
+//    image=cv::imread("C:\\Users\\jhanbin\\Pictures\\untitled.png");
+//    killTimer(0);
 
     QImage mRenderQtImg = QImage((const unsigned char*)(image.data),
                                  image.cols, image.rows,

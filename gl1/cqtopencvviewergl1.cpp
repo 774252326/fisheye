@@ -5,14 +5,17 @@
 
 #include <iostream>
 
+#include "fisheyesphere.hpp"
+
 CQtOpenCVViewerGl1::CQtOpenCVViewerGl1(QWidget *parent)
     : QOpenGLWidget(parent)
     , program(0)
 {
     texture=0;
-    angle=0;
-    anglex=-120;
-    fovh=80;
+    anglex=0;
+    angley=0;
+
+    fovh=120;
 }
 
 
@@ -84,9 +87,9 @@ void CQtOpenCVViewerGl1::paintGL()
     m.perspective(fovh, winw/winh, 0.01f,15.f);
     //  m.setToIdentity();
     //    m.translate(0.0f, 0.0f, -1.1f);
-        m.rotate(anglex, 1.0f, 0.0f, 0.0f);
-//        m.rotate(angle, 0.0f, 1.0f, 0.0f);
-    m.rotate(angle, 0.0f, 0.0f, 1.0f);
+    m.rotate(angley, 1.0f, 0.0f, 0.0f);
+    //        m.rotate(angle, 0.0f, 1.0f, 0.0f);
+    m.rotate(anglex, 0.0f, 0.0f, 1.0f);
 
     program->setUniformValue("matrix", m);
     program->enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
@@ -98,7 +101,6 @@ void CQtOpenCVViewerGl1::paintGL()
 
     if(texture!=0)
         texture->bind();
-//    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     int starti=0;
     for(int i=0;i<tgstripseg.size();i++)
     {
@@ -109,8 +111,6 @@ void CQtOpenCVViewerGl1::paintGL()
 }
 void CQtOpenCVViewerGl1::resizeGL(int width, int height)
 {
-    //    int side = qMin(width, height);
-    //    glViewport((width - side) / 2, (height - side) / 2, side, side);
     glViewport(0,0,width,height);
     winw=width;
     winh=height;
@@ -118,80 +118,49 @@ void CQtOpenCVViewerGl1::resizeGL(int width, int height)
 
 void CQtOpenCVViewerGl1::mousePressEvent(QMouseEvent *event)
 {
-    std::cout<<"\n\nmousePressEvent\n\n"<<std::flush;
+//    std::cout<<"\n\nmousePressEvent\n\n"<<std::flush;
     lastPos = event->pos();
 }
 
 void CQtOpenCVViewerGl1::mouseMoveEvent(QMouseEvent *event)
 {
-    std::cout<<"\n\nmouseMoveEvent\n\n"<<std::flush;
+//    std::cout<<"\n\nmouseMoveEvent\n\n"<<std::flush;
     int dx = event->x() - lastPos.x();
     int dy = event->y() - lastPos.y();
 
     if (event->buttons() & Qt::LeftButton) {
-        //        rotateBy(8 * dy, 8 * dx, 0);
-        angle-=dx*fovh/winh;
-        anglex-=dy*fovh/winh;
-    } else if (event->buttons() & Qt::RightButton) {
-        //        rotateBy(8 * dy, 0, 8 * dx);
-    }
+        anglex+=dx*fovh/winh;
+        angley-=dy*fovh/winh;
+        if(angley<0)angley=0;
+        if(angley>180)angley=180;
+
+        update();
+    } else
+        if (event->buttons() & Qt::RightButton) {
+        }
     lastPos = event->pos();
 
     std::cout<<"anglex="<<anglex<<"\n"<<std::flush;
-    std::cout<<"angle="<<angle<<"\n"<<std::flush;
+    std::cout<<"angley="<<angley<<"\n"<<std::flush;
+
+
 
 }
 
 void CQtOpenCVViewerGl1::mouseReleaseEvent(QMouseEvent *  event )
 {
-    std::cout<<"\n\nmouseReleaseEvent\n\n"<<std::flush;
-    //    emit clicked();
-
-//    if (event->buttons() & Qt::LeftButton) {
-//        angle+=10;
-//    } else if (event->buttons() & Qt::RightButton) {
-//        angle-=10;
-//    }
-
-//    std::cout<<"angle="<<angle<<"\n"<<std::flush;
+//    std::cout<<"\n\nmouseReleaseEvent\n\n"<<std::flush;
+    update();
 }
 
 void CQtOpenCVViewerGl1::makeObject()
 {
-    static const float coords[4][5] = {
-         { +1, -1, -1, 1, 0 },
-        { +1, +1, -1, 1, 1 },
-        { -1, +1, -1, 0, 1 },
-        { -1, -1, -1, 0, 0 }
-    };
-
-//    QVector<GLfloat> vertData;
-
-    std::vector<float> vertData;
-    for (int j = 0; j < 4; ++j) {
-//        // vertex position
-//        vertData.append(coords[j][0]);
-//        vertData.append(coords[j][1]);
-//        vertData.append(coords[j][2]);
-//        // texture coordinate
-//        vertData.append(coords[j][3]);
-//        vertData.append(coords[j][4]);
-
-        // vertex position
-        vertData.push_back(coords[j][0]);
-        vertData.push_back(coords[j][1]);
-        vertData.push_back(coords[j][2]);
-        // texture coordinate
-        vertData.push_back(coords[j][3]);
-        vertData.push_back(coords[j][4]);
-    }
 
     std::vector<float> v;
-    fisheyevertex(v, tgstripseg, 110*acos(-1)/180, 40, 90, 640, 480);
+    FisheyeSphere(1280,1024,110*acos(-1)/180).fisheyevertex(v, tgstripseg);
 
     vbo.create();
     vbo.bind();
-//    vbo.allocate(vertData.constData(), vertData.count() * sizeof(GLfloat));
     vbo.allocate(v.data(), v.size() * sizeof(GLfloat));
 }
 

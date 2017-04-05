@@ -28,26 +28,27 @@ SOURCES += main.cpp\
     cqtopencvviewergl1.cpp
 
 HEADERS  += mainwindow.h \
-    cqtopencvviewergl1.h
+    cqtopencvviewergl1.h \
+    fisheyesphere.hpp
 
 FORMS    += mainwindow.ui
 
-INCLUDEPATH += C:/opencv3.2.0/opencv/mingw/install/include \
+INCLUDEPATH += C:/opencv/mingw/include \
 
 LIBS += \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_calib3d320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_core320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_features2d320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_flann320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_highgui320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_imgcodecs320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_imgproc320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_ml320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_objdetect320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_photo320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_shape320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_stitching320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_superres320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_video320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_videoio320.dll.a \
-C:/opencv3.2.0/opencv/mingw/install/x86/mingw/lib/libopencv_videostab320.dll.a
+C:/opencv/mingw/x86/mingw/lib/libopencv_calib3d320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_core320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_features2d320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_flann320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_highgui320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_imgcodecs320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_imgproc320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_ml320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_objdetect320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_photo320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_shape320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_stitching320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_superres320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_video320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_videoio320.dll.a \
+C:/opencv/mingw/x86/mingw/lib/libopencv_videostab320.dll.a
