@@ -15,7 +15,7 @@ CQtOpenCVViewerGl1::CQtOpenCVViewerGl1(QWidget *parent)
     anglex=0;
     angley=0;
 
-    fovh=120;
+    fovh=80;
 }
 
 
@@ -153,12 +153,21 @@ void CQtOpenCVViewerGl1::mouseReleaseEvent(QMouseEvent *  event )
     update();
 }
 
+void CQtOpenCVViewerGl1::wheelEvent(QWheelEvent *event)
+{
+    if(event->angleDelta().y()>0)
+        fovh*=0.96;
+    else
+        fovh/=0.96;
+    std::cout<<event->angleDelta().x()<<","<<event->angleDelta().y()<<"\n"<<std::flush;
+}
+
 void CQtOpenCVViewerGl1::makeObject()
 {
 
     std::vector<float> v;
-    FisheyeSphere(1280,1024,110*acos(-1)/180).fisheyevertex(v, tgstripseg);
-
+//    FisheyeSphere(1280,1024,110*acos(-1)/180).fisheyevertex(v, tgstripseg);
+ FisheyeSphere(4000,3000,140*acos(-1)/180).fisheyevertex(v, tgstripseg);
     vbo.create();
     vbo.bind();
     vbo.allocate(v.data(), v.size() * sizeof(GLfloat));

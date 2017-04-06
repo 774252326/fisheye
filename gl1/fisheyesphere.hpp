@@ -20,8 +20,8 @@ public:
         , nsega(nsega0)
         , nsegb(nsegb0)
     {
-                float imageRadiusPixel=ImageRadiusPixel(0.75, 4.28, 4.3/2);
-//        float imageRadiusPixel=ImageRadiusPixel(0.75, 4.55, 4.2/2);
+//                float imageRadiusPixel=ImageRadiusPixel(0.75, 4.28, 4.3/2);
+        float imageRadiusPixel=ImageRadiusPixel(0.75, 4.55, 4.2/2);
 
 //                float f_equidistant=imageRadiusPixel/halffov;f=f_equidistant;
         //        float f_orthographic=imageRadiusPixel/sin(halffov);f=f_orthographic;
@@ -102,7 +102,7 @@ public:
         vertex[0][1]=ballradius*sin(alpha)*sin(beta);
         vertex[0][2]=ballradius*cos(alpha);
 
-        FixOrient(vertex[0][0], vertex[0][1], vertex[0][2], 0, 2, -1);
+        FixOrient(vertex[0][0], vertex[0][1], vertex[0][2], 0, -1, -0);
 
         projection(vertex[0][3], vertex[0][4], alpha, beta, centerx, centery);
         vertex[0][3]/=width;
@@ -119,7 +119,7 @@ public:
                 vertex[vertexindex][1]=ballradius*sin(alpha)*sin(beta);
                 vertex[vertexindex][2]=ballradius*cos(alpha);
 
-                FixOrient(vertex[vertexindex][0], vertex[vertexindex][1], vertex[vertexindex][2], 0, 2, -1);
+                FixOrient(vertex[vertexindex][0], vertex[vertexindex][1], vertex[vertexindex][2], 0, -1, -0);
 
                 projection(vertex[vertexindex][3], vertex[vertexindex][4], alpha, beta, centerx, centery);
                 vertex[vertexindex][3]/=width;

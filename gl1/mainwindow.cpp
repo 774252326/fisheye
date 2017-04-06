@@ -9,11 +9,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //    c.open("Z:\\Project Share Folder\\JIAN\\Entaniya Fisheye 280 on GoPro HERO 4 Direct mount.mp4");
 
-    c.open( 0 );
-    c.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-    c.set(cv::CAP_PROP_FRAME_HEIGHT, 1024);
+//    c.open( 1 );
+//    c.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+//    c.set(cv::CAP_PROP_FRAME_HEIGHT, 1024);
 
-    startTimer(0);
+    timer=startTimer(0);
 }
 
 MainWindow::~MainWindow()
@@ -24,16 +24,18 @@ MainWindow::~MainWindow()
 
 void MainWindow::timerEvent(QTimerEvent *event)
 {
+    std::cout<<"timerEvent\n"<<std::flush;
+
     cv::Mat image;
-    if(!c.read(image))
+//    if(!c.read(image))
     {
-        killTimer(0);
-        c.release();
-        return;
+//        killTimer(timer);
+//        c.release();
+//        return;
     }
 
-//    image=cv::imread("C:\\Users\\jhanbin\\Pictures\\untitled.png");
-//    killTimer(0);
+    image=cv::imread("C:\\Users\\jhanbin\\Desktop\\pro\\fisheye\\gl1\\280_003.jpg");
+    killTimer(timer);
 
     QImage mRenderQtImg = QImage((const unsigned char*)(image.data),
                                  image.cols, image.rows,

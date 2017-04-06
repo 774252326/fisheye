@@ -22,6 +22,7 @@ protected:
 private:
     Ui::MainWindow *ui;
     cv::VideoCapture c;
+    int timer;
 };
 
 #endif // MAINWINDOW_H
