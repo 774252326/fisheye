@@ -17,7 +17,7 @@
 //#include "depththread.hpp"
 
 //#define RECORDIMG
-#define OUTADN
+//#define OUTADN
 //#define SOUND
 //#define DEPTHS
 

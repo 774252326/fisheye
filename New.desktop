@@ -1,0 +1,7 @@
+[Desktop Entry]
+Comment=
+Exec=/home/pi/fisheye/up0.sh
+Icon=QtProject-qtcreator
+Name=ino
+Path=/home/pi/fisheye
+Type=Application
