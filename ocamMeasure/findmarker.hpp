@@ -25,7 +25,9 @@ public:
     FindMarker(int dictionaryId=11)
     {
         detectorParams = cv::aruco::DetectorParameters::create();
-        detectorParams->doCornerRefinement = true; // do corner refinement in markers
+//        detectorParams->doCornerRefinement = true; // do corner refinement in markers
+
+        detectorParams->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX; // do corner refinement in markers
         dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
     }
 
