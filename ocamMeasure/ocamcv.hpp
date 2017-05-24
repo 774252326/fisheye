@@ -17,7 +17,7 @@
 //#include "depththread.hpp"
 
 //#define RECORDIMG
-//#define OUTADN
+#define OUTADN
 //#define SOUND
 //#define DEPTHS
 
@@ -218,6 +218,8 @@ public:
 //        c.set(cv::CAP_PROP_SETTINGS,1);
 
         cv::namedWindow("f",cv::WINDOW_NORMAL);
+
+        cv::waitKey(4000);
 
         c.read(m);
         //        cv::imwrite("capture.png",m);
