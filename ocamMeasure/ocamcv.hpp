@@ -219,7 +219,7 @@ public:
 
         cv::namedWindow("f",cv::WINDOW_NORMAL);
 
-        cv::waitKey(4000);
+        cv::waitKey(20000);
 
         c.read(m);
         //        cv::imwrite("capture.png",m);
@@ -247,7 +247,15 @@ public:
 #ifdef SOUND
         NoticeThread mt;
         mt.start();
+
+        bool init=false;
+
+
+
 #endif
+
+
+//        std::cout<<"11\n"<<std::flush;
         int k=0;
         while(k!=27)
         {
@@ -261,6 +269,12 @@ public:
 #endif
 
                 cv::Vec3d tt=fmf.Detect(2,m,model,markerLength);
+
+#ifdef SOUND
+                if(!init && tt[2]>0)
+                    init=true;
+#endif
+
                 fmf.DrawResult(m,model,markerLength);
                 std::cout<<tt<<'\n'<<std::flush;
 
@@ -285,13 +299,21 @@ public:
 #endif
 //                std::cout<<(float)(clock()-t)*1000/CLOCKS_PER_SEC<<"ms\n\n\n"<<std::flush;
 #ifdef SOUND
+                if(init)
+                {
+
                 if(tt[2]>0)
-                    if(tt[2]<1700)
+                    if(tt[2]<4000)
                         mt.index=2;
                     else
                         mt.index=0;
                 else
                     mt.index=1;
+                }
+                else
+                {
+                    mt.index=2;
+                }
 #endif
                 cv::imshow("f",m);
                 k=cv::waitKey(1);

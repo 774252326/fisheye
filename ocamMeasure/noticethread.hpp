@@ -12,13 +12,15 @@ public:
     NoticeThread()
         : index(2)
     {
-//        cmd[0]="mplayer \"/home/a/Music/Windows Shutdown.wav\"";
-//        cmd[1]="mplayer \"/home/a/Music/Windows Error.wav\"";
+        cmd[0]="mplayer \"/home/u/Music/renee2.wav\"";
+        cmd[1]="mplayer \"/home/u/Music/renee2.wav\"";
 
+//        cmd[0]="mplayer \"/home/u/Music/slow.wav\"";
+//        cmd[1]="mplayer \"/home/u/Music/lost.wav\"";
 
-        cmd[0]="mplayer \"/home/a/Music/slowdown.mp3\"";
+//        cmd[0]="mplayer \"/home/a/Music/slowdown.mp3\"";
 //        cmd[1]="mplayer \"/home/a/Music/targetlost.mp3\"";
-        cmd[1]="";
+//        cmd[1]="";
         cmd[2]="";
 
     }
