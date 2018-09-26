@@ -1,7 +1,0 @@
-[Desktop Entry]
-Comment=
-Exec=/home/pi/fisheye/up.sh
-Icon=QtProject-qtcreator
-Name=agvred
-Path=/home/pi/fisheye/ocamMeasure
-Type=Application

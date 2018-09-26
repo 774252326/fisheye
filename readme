@@ -1,0 +1,11 @@
+step:
+1. install qt 
+2. install opencv with aruco module
+3. install arduino ide, enable usb dial out
+4. build ocamMeasure project
+5. add command "  gnome-terminal -e "/home/u/fisheye/build-ocamMeasure-Desktop-Release/ocamMeasure /home/u/fisheye/ocamMeasure/2.1mm/calib_results1920x1080.txt 120 /dev/ttyACM0"  " in 'Startup Applications' for autostart on ubuntu login
+
+
+ar code generate:
+refer to https://github.com/opencv/opencv_contrib/blob/master/modules/aruco/samples/create_marker.cpp
+the ar code in use is dictionary id=0 and marker id=2 and length=120mm

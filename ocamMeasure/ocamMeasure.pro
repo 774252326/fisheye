@@ -104,18 +104,6 @@ QT       -= gui
 SOURCES += \
     main.cpp
 
-HEADERS += \
-    stereoocam.hpp \
-    ConnectComponent.hpp \
-    Measure.hpp \
-    ToArduino.hpp \
-    ocamcv.hpp \
-    ocam_model.hpp \
-    noticethread.hpp \
-    controlthread.hpp \
-    percipio_camport.h \
-    findmarker.hpp \
-    findmarkerfisheye.hpp \
-    fisheyemodel.hpp
+
 
 
